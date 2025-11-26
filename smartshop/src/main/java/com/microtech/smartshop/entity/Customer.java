@@ -6,7 +6,6 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,7 +44,7 @@ public class Customer {
     @Builder.Default
     private BigDecimal totalSpent = BigDecimal.ZERO;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id", unique = true)
     private User user;
 

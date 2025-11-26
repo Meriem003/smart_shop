@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class CustomerUpdateRequest {
 
     private String nom;
-
     @Email
     private String email;
 }
+
