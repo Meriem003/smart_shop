@@ -10,6 +10,8 @@ import com.microtech.smartshop.entity.Order;
 import com.microtech.smartshop.entity.User;
 import com.microtech.smartshop.enums.CustomerTier;
 import com.microtech.smartshop.enums.UserRole;
+import com.microtech.smartshop.exception.ResourceNotFoundException;
+import com.microtech.smartshop.exception.ValidationException;
 import com.microtech.smartshop.mapper.CustomerMapper;
 import com.microtech.smartshop.mapper.OrderMapper;
 import com.microtech.smartshop.repository.CustomerRepository;
@@ -36,10 +38,10 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public CustomerResponse createCustomer(CustomerCreateRequest request) {
         if (customerRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Un client avec cet email existe déjà");
+            throw new ValidationException("Un client avec cet email existe déjà");
         }
         if (userRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("Ce nom d'utilisateur est déjà utilisé");
+            throw new ValidationException("Ce nom d'utilisateur est déjà utilisé");
         }
         User user = User.builder()
                 .username(request.getUsername())
@@ -66,7 +68,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Transactional(readOnly = true)
     public CustomerResponse getCustomerById(Long customerId) {
         Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new RuntimeException("Client non trouvé avec l'ID: " + customerId));
+                .orElseThrow(() -> new ResourceNotFoundException("Customer", "id", customerId));
 
         return customerMapper.toResponse(customer);
     }
@@ -74,14 +76,14 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public CustomerResponse updateCustomer(Long customerId, CustomerUpdateRequest request) {
         Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new RuntimeException("Client non trouvé avec l'ID: " + customerId));
+                .orElseThrow(() -> new ResourceNotFoundException("Customer", "id", customerId));
         if (request.getNom() != null && !request.getNom().isBlank()) {
             customer.setNom(request.getNom());
         }
         if (request.getEmail() != null && !request.getEmail().isBlank()) {
             if (!customer.getEmail().equals(request.getEmail()) &&
                     customerRepository.existsByEmail(request.getEmail())) {
-                throw new RuntimeException("Un autre client utilise déjà cet email");
+                throw new ValidationException("Un autre client utilise déjà cet email");
             }
             customer.setEmail(request.getEmail());
         }
@@ -95,7 +97,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Transactional(readOnly = true)
     public CustomerStatsResponse getCustomerStats(Long customerId) {
         Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new RuntimeException("Client non trouvé avec l'ID: " + customerId));
+                .orElseThrow(() -> new ResourceNotFoundException("Customer", "id", customerId));
         return customerMapper.toStatsResponse(customer);
     }
 
@@ -103,7 +105,7 @@ public class CustomerServiceImpl implements CustomerService {
     @Transactional(readOnly = true)
     public List<OrderResponse> getCustomerOrderHistory(Long customerId) {
         if (!customerRepository.existsById(customerId)) {
-            throw new RuntimeException("Client non trouvé avec l'ID: " + customerId);
+            throw new ResourceNotFoundException("Customer", "id", customerId);
         }
         List<Order> orders = orderRepository.findByCustomerIdOrderByDateCommandeDesc(customerId);
         return orderMapper.toResponseList(orders);

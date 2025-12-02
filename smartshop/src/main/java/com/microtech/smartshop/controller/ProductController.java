@@ -53,19 +53,24 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<ProductResponse>> getAllProducts(
+    public ResponseEntity<Map<String, Object>> getAllProducts(
             @RequestParam(required = false) String nom,
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "ASC") String sortDirection) {
 
         Sort.Direction direction = sortDirection.equalsIgnoreCase("DESC") ? Sort.Direction.DESC : Sort.Direction.ASC;
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+        Pageable pageable = PageRequest.of(0, 10, Sort.by(direction, "id"));
 
         Page<ProductResponse> products = productService.getAllProducts(nom, minPrice, maxPrice, pageable);
-        return ResponseEntity.ok(products);
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("content", products.getContent());
+        response.put("totalElements", products.getTotalElements());
+        response.put("totalPages", products.getTotalPages());
+        response.put("currentPage", products.getNumber());
+        response.put("pageSize", products.getSize());
+        
+        return ResponseEntity.ok(response);
     }
 }

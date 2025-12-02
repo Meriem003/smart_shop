@@ -3,6 +3,9 @@ package com.microtech.smartshop.service.impl;
 import com.microtech.smartshop.dto.request.PromoCodeCreateRequest;
 import com.microtech.smartshop.dto.response.PromoCodeResponse;
 import com.microtech.smartshop.entity.PromoCode;
+import com.microtech.smartshop.exception.BusinessRuleException;
+import com.microtech.smartshop.exception.ResourceNotFoundException;
+import com.microtech.smartshop.exception.ValidationException;
 import com.microtech.smartshop.mapper.PromoCodeMapper;
 import com.microtech.smartshop.repository.PromoCodeRepository;
 import com.microtech.smartshop.service.PromoCodeService;
@@ -24,17 +27,13 @@ public class PromoCodeServiceImpl implements PromoCodeService {
 
     @Override
     public PromoCodeResponse createPromoCode(PromoCodeCreateRequest request) {
-        // Vérifier si le code existe déjà
         if (promoCodeRepository.existsByCode(request.getCode())) {
-            throw new RuntimeException("Un code promo avec ce code existe déjà: " + request.getCode());
+            throw new ValidationException("Un code promo avec ce code existe déjà: " + request.getCode());
         }
 
-        // Valider le format du code (PROMO-XXXX)
         if (!request.getCode().matches("PROMO-[A-Z0-9]{4}")) {
-            throw new RuntimeException("Format de code promo invalide. Format attendu: PROMO-XXXX");
+            throw new ValidationException("Format de code promo invalide. Format attendu: PROMO-XXXX");
         }
-
-        // Convertir le pourcentage (1-100) en décimal (0.01-1.00)
         BigDecimal pourcentageDecimal = request.getPourcentageRemise() != null
                 ? request.getPourcentageRemise().divide(new BigDecimal("100"))
                 : new BigDecimal("0.05");
@@ -65,7 +64,7 @@ public class PromoCodeServiceImpl implements PromoCodeService {
     @Transactional(readOnly = true)
     public PromoCodeResponse getPromoCodeById(Long id) {
         PromoCode promoCode = promoCodeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Code promo non trouvé avec l'ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("PromoCode", "id", id));
         return promoCodeMapper.toResponse(promoCode);
     }
 
@@ -73,14 +72,14 @@ public class PromoCodeServiceImpl implements PromoCodeService {
     @Transactional(readOnly = true)
     public PromoCodeResponse getPromoCodeByCode(String code) {
         PromoCode promoCode = promoCodeRepository.findByCode(code)
-                .orElseThrow(() -> new RuntimeException("Code promo non trouvé: " + code));
+                .orElseThrow(() -> new ResourceNotFoundException("Code promo non trouvé: " + code));
         return promoCodeMapper.toResponse(promoCode);
     }
 
     @Override
     public void deletePromoCode(Long id) {
         if (!promoCodeRepository.existsById(id)) {
-            throw new RuntimeException("Code promo non trouvé avec l'ID: " + id);
+            throw new ResourceNotFoundException("PromoCode", "id", id);
         }
         promoCodeRepository.deleteById(id);
     }
@@ -88,14 +87,11 @@ public class PromoCodeServiceImpl implements PromoCodeService {
     @Override
     public PromoCodeResponse validateAndUsePromoCode(String code) {
         PromoCode promoCode = promoCodeRepository.findByCode(code)
-                .orElseThrow(() -> new RuntimeException("Code promo invalide: " + code));
+                .orElseThrow(() -> new ResourceNotFoundException("Code promo invalide: " + code));
 
-        // Vérifier si le code a déjà été utilisé (si usage unique)
         if (promoCode.getUsageUnique() && promoCode.getUsed()) {
-            throw new RuntimeException("Ce code promo a déjà été utilisé");
+            throw new BusinessRuleException("Ce code promo a déjà été utilisé");
         }
-
-        // Marquer comme utilisé
         promoCode.setUsed(true);
         PromoCode updated = promoCodeRepository.save(promoCode);
 

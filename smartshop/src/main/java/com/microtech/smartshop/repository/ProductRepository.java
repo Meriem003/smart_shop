@@ -12,6 +12,12 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     Page<Product> findByDeletedFalse(Pageable pageable);
     Page<Product> findByNomContainingIgnoreCaseAndDeletedFalse(String nom, Pageable pageable);
     Page<Product> findByPrixUnitaireBetweenAndDeletedFalse(BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable);
+    Page<Product> findByPrixUnitaireGreaterThanEqualAndDeletedFalse(BigDecimal minPrice, Pageable pageable);
+    Page<Product> findByPrixUnitaireLessThanEqualAndDeletedFalse(BigDecimal maxPrice, Pageable pageable);
     Page<Product> findByNomContainingIgnoreCaseAndPrixUnitaireBetweenAndDeletedFalse(
             String nom, BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable);
+    Page<Product> findByNomContainingIgnoreCaseAndPrixUnitaireGreaterThanEqualAndDeletedFalse(
+            String nom, BigDecimal minPrice, Pageable pageable);
+    Page<Product> findByNomContainingIgnoreCaseAndPrixUnitaireLessThanEqualAndDeletedFalse(
+            String nom, BigDecimal maxPrice, Pageable pageable);
 }
