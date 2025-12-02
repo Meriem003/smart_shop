@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,11 +34,14 @@ public class PromoCodeServiceImpl implements PromoCodeService {
             throw new RuntimeException("Format de code promo invalide. Format attendu: PROMO-XXXX");
         }
 
+        // Convertir le pourcentage (1-100) en décimal (0.01-1.00)
+        BigDecimal pourcentageDecimal = request.getPourcentageRemise() != null
+                ? request.getPourcentageRemise().divide(new BigDecimal("100"))
+                : new BigDecimal("0.05");
+
         PromoCode promoCode = PromoCode.builder()
                 .code(request.getCode())
-                .pourcentageRemise(request.getPourcentageRemise() != null
-                        ? request.getPourcentageRemise()
-                        : new BigDecimal("0.05"))
+                .pourcentageRemise(pourcentageDecimal)
                 .usageUnique(request.getUsageUnique() != null
                         ? request.getUsageUnique()
                         : true)
