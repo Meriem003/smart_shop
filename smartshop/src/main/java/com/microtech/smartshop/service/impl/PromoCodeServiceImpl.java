@@ -13,9 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -41,9 +39,7 @@ public class PromoCodeServiceImpl implements PromoCodeService {
         PromoCode promoCode = PromoCode.builder()
                 .code(request.getCode())
                 .pourcentageRemise(pourcentageDecimal)
-                .usageUnique(request.getUsageUnique() != null
-                        ? request.getUsageUnique()
-                        : true)
+                .usageUnique(request.getUsageUnique() != null && request.getUsageUnique())
                 .used(false)
                 .build();
 
@@ -57,7 +53,7 @@ public class PromoCodeServiceImpl implements PromoCodeService {
         return promoCodeRepository.findAll()
                 .stream()
                 .map(promoCodeMapper::toResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
