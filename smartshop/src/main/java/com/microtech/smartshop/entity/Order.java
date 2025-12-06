@@ -59,8 +59,7 @@ public class Order {
     private String codePromo;
 
     @Column(nullable = false, precision = 3, scale = 2)
-    @Builder.Default
-    private BigDecimal tauxTVA = new BigDecimal("0.20");
+    private BigDecimal tauxTVA;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)

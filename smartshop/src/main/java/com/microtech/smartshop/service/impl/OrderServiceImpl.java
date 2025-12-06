@@ -16,6 +16,7 @@ import com.microtech.smartshop.repository.PromoCodeRepository;
 import com.microtech.smartshop.service.LoyaltyService;
 import com.microtech.smartshop.service.OrderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
@@ -32,6 +33,9 @@ public class OrderServiceImpl implements OrderService {
     private final ProductRepository productRepository;
     private final PromoCodeRepository promoCodeRepository;
     private final LoyaltyService loyaltyService;
+
+    @Value("${app.tva.taux}")
+    private BigDecimal tauxTVA;
 
     @Override
     @Transactional
@@ -120,7 +124,8 @@ public class OrderServiceImpl implements OrderService {
                 .setScale(2, RoundingMode.HALF_UP);
         order.setMontantHT(montantHT);
 
-        BigDecimal montantTVA = montantHT.multiply(order.getTauxTVA())
+        order.setTauxTVA(tauxTVA);
+        BigDecimal montantTVA = montantHT.multiply(tauxTVA)
                 .setScale(2, RoundingMode.HALF_UP);
         order.setMontantTVA(montantTVA);
 
