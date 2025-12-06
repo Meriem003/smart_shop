@@ -2,18 +2,23 @@ package com.microtech.smartshop.controller;
 
 import com.microtech.smartshop.entity.User;
 import com.microtech.smartshop.service.AuthService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
+@Tag(name = "Authentification", description = "Gestion de l'authentification et des sessions")
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
     private final AuthService authService;
+    
+    @Operation(summary = "Connexion", description = "Authentification d'un utilisateur ADMIN ou CLIENT")
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(@RequestBody Map<String, String> credentials) {
         String username = credentials.get("username");
@@ -27,6 +32,7 @@ public class AuthController {
         ));
     }
     
+    @Operation(summary = "Utilisateur connecté", description = "Récupérer les informations de l'utilisateur connecté")
     @GetMapping("/me")
     public ResponseEntity<Map<String, String>> getCurrentUser() {
         User user = authService.getCurrentUser();
@@ -37,6 +43,7 @@ public class AuthController {
         ));
     }
     
+    @Operation(summary = "Déconnexion", description = "Déconnexion de l'utilisateur et fermeture de la session")
     @PostMapping("/logout")
     public ResponseEntity<Map<String, String>> logout() {
         authService.logout();

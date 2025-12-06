@@ -8,6 +8,8 @@ import com.microtech.smartshop.enums.UserRole;
 import com.microtech.smartshop.exception.ForbiddenException;
 import com.microtech.smartshop.service.AuthService;
 import com.microtech.smartshop.service.ProductService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,6 +23,7 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
+@Tag(name = "Produits", description = "Gestion du catalogue produits avec pagination")
 @RestController
 @RequestMapping("/api/products")
 @RequiredArgsConstructor
@@ -29,7 +32,7 @@ public class ProductController {
     private final ProductService productService;
     private final AuthService authService;
 
-
+    @Operation(summary = "Créer un produit", description = "Ajouter un nouveau produit au catalogue (ADMIN uniquement)")
     @PostMapping
     public ResponseEntity<ProductResponse> createProduct(@Valid @RequestBody ProductCreateRequest request) {
         User user = authService.getCurrentUser();
@@ -41,7 +44,7 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-
+    @Operation(summary = "Consulter un produit", description = "Récupérer les détails d'un produit par ID")
     @GetMapping("/{id}")
     public ResponseEntity<ProductResponse> getProductById(@PathVariable Long id) {
         ProductResponse response = productService.getProductById(id);

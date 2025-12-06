@@ -7,6 +7,8 @@ import com.microtech.smartshop.enums.UserRole;
 import com.microtech.smartshop.exception.ForbiddenException;
 import com.microtech.smartshop.service.AuthService;
 import com.microtech.smartshop.service.PromoCodeService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "Codes Promo", description = "Gestion des codes promotionnels avec dates de validité")
 @RestController
 @RequestMapping("/api/promo-codes")
 @RequiredArgsConstructor
@@ -23,6 +26,7 @@ public class PromoCodeController {
     private final PromoCodeService promoCodeService;
     private final AuthService authService;
 
+    @Operation(summary = "Créer un code promo", description = "Créer un nouveau code promotionnel avec pourcentage et dates")
     @PostMapping
     public ResponseEntity<PromoCodeResponse> createPromoCode(
             @Valid @RequestBody PromoCodeCreateRequest request) {
@@ -35,6 +39,7 @@ public class PromoCodeController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @Operation(summary = "Lister les codes promo", description = "Récupérer tous les codes promotionnels")
     @GetMapping
     public ResponseEntity<List<PromoCodeResponse>> getAllPromoCodes() {
         User user = authService.getCurrentUser();
@@ -45,6 +50,7 @@ public class PromoCodeController {
         return ResponseEntity.ok(promoCodes);
     }
 
+    @Operation(summary = "Consulter un code promo", description = "Récupérer un code promo par ID")
     @GetMapping("/{id}")
     public ResponseEntity<PromoCodeResponse> getPromoCodeById(@PathVariable Long id) {
         User user = authService.getCurrentUser();

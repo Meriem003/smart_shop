@@ -11,13 +11,15 @@ import com.microtech.smartshop.enums.UserRole;
 import com.microtech.smartshop.exception.ForbiddenException;
 import com.microtech.smartshop.service.AuthService;
 import com.microtech.smartshop.service.PaymentService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-
+@Tag(name = "Paiements", description = "Gestion des paiements multi-méthodes (Espèces, Chèque, Virement)")
 @RestController
 @RequestMapping("/api/payments")
 @RequiredArgsConstructor
@@ -26,7 +28,7 @@ public class PaymentController {
     private final PaymentService paymentService;
     private final AuthService authService;
 
-
+    @Operation(summary = "Paiement en espèces", description = "Enregistrer un paiement en espèces pour une commande")
     @PostMapping("/especes")
     public ResponseEntity<PaymentEspecesResponse> addPaymentEspeces(@Valid @RequestBody PaymentEspecesRequest request) {
         User user = authService.getCurrentUser();
@@ -38,6 +40,7 @@ public class PaymentController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    @Operation(summary = "Paiement par chèque", description = "Enregistrer un paiement par chèque avec numéro et banque")
     @PostMapping("/cheque")
     public ResponseEntity<PaymentChequeResponse> addPaymentCheque(@Valid @RequestBody PaymentChequeRequest request) {
         User user = authService.getCurrentUser();
@@ -50,6 +53,7 @@ public class PaymentController {
     }
     
 
+    @Operation(summary = "Paiement par virement", description = "Enregistrer un paiement par virement bancaire")
     @PostMapping("/virement")
     public ResponseEntity<PaymentVirementResponse> addPaymentVirement(@Valid @RequestBody PaymentVirementRequest request) {
         User user = authService.getCurrentUser();

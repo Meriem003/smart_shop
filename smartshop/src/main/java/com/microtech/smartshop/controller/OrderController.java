@@ -7,12 +7,15 @@ import com.microtech.smartshop.enums.UserRole;
 import com.microtech.smartshop.exception.ForbiddenException;
 import com.microtech.smartshop.service.AuthService;
 import com.microtech.smartshop.service.OrderService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Commandes", description = "Gestion des commandes avec remises et calculs automatiques")
 @RestController
 @RequestMapping("/api/orders")
 @RequiredArgsConstructor
@@ -21,6 +24,7 @@ public class OrderController {
     private final OrderService orderService;
     private final AuthService authService;
 
+    @Operation(summary = "Créer une commande", description = "Créer une commande multi-produits avec calculs automatiques (ADMIN uniquement)")
     @PostMapping
     public ResponseEntity<OrderResponse> createOrder(@Valid @RequestBody CreateOrderRequest request) {
         User user = authService.getCurrentUser();
@@ -32,6 +36,7 @@ public class OrderController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    @Operation(summary = "Valider une commande", description = "Confirmer une commande après paiement complet (ADMIN uniquement)")
     @PutMapping("/{orderId}/confirm")
     public ResponseEntity<OrderResponse> confirmOrder(@PathVariable Long orderId) {
         User user = authService.getCurrentUser();
