@@ -3,6 +3,10 @@ package com.microtech.smartshop.controller;
 import com.microtech.smartshop.dto.request.ProductCreateRequest;
 import com.microtech.smartshop.dto.request.ProductUpdateRequest;
 import com.microtech.smartshop.dto.response.ProductResponse;
+import com.microtech.smartshop.entity.User;
+import com.microtech.smartshop.enums.UserRole;
+import com.microtech.smartshop.exception.ForbiddenException;
+import com.microtech.smartshop.service.AuthService;
 import com.microtech.smartshop.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,12 +27,20 @@ import java.util.Map;
 public class ProductController {
 
     private final ProductService productService;
+    private final AuthService authService;
+
 
     @PostMapping
     public ResponseEntity<ProductResponse> createProduct(@Valid @RequestBody ProductCreateRequest request) {
+        User user = authService.getCurrentUser();
+        if (user.getRole() != UserRole.ADMIN) {
+            throw new ForbiddenException("Accès réservé aux administrateurs");
+        }
+        
         ProductResponse response = productService.createProduct(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductResponse> getProductById(@PathVariable Long id) {
@@ -40,12 +52,23 @@ public class ProductController {
     public ResponseEntity<ProductResponse> updateProduct(
             @PathVariable Long id,
             @Valid @RequestBody ProductUpdateRequest request) {
+        User user = authService.getCurrentUser();
+        if (user.getRole() != UserRole.ADMIN) {
+            throw new ForbiddenException("Accès réservé aux administrateurs");
+        }
+        
         ProductResponse response = productService.updateProduct(id, request);
         return ResponseEntity.ok(response);
     }
 
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> deleteProduct(@PathVariable Long id) {
+        User user = authService.getCurrentUser();
+        if (user.getRole() != UserRole.ADMIN) {
+            throw new ForbiddenException("Accès réservé aux administrateurs");
+        }
+        
         productService.deleteProduct(id);
         Map<String, String> response = new HashMap<>();
         response.put("message", "Produit supprimé avec succès");
