@@ -29,8 +29,7 @@ public class PromoCode {
     @DecimalMin(value = "0.0")
     @DecimalMax(value = "1.0")
     @Column(nullable = false, precision = 3, scale = 2)
-    @Builder.Default
-    private BigDecimal pourcentageRemise = new BigDecimal("0.05");
+    private BigDecimal pourcentageRemise;
 
     @Column(nullable = false)
     @Builder.Default

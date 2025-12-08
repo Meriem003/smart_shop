@@ -79,7 +79,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public void deleteProduct(Long productId) {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new ResourceNotFoundException("Product", "id", productId));
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "id", productId));        
         boolean hasOrders = orderItemRepository.existsByProductId(productId);
 
         if (hasOrders) {

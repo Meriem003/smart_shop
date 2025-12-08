@@ -19,8 +19,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public User login(String username, String password) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UnauthorizedException("Nom d'utilisateur ou mot de passe incorrect"));        
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new UnauthorizedException("Nom d'utilisateur ou mot de passe incorrect"));        
         if (!user.getPassword().equals(password)) {
             throw new UnauthorizedException("Nom d'utilisateur ou mot de passe incorrect");
         }
@@ -34,8 +33,7 @@ public class AuthServiceImpl implements AuthService {
         if (userId == null) {
             throw new UnauthorizedException("Aucun utilisateur connecté");
         }        
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new UnauthorizedException("Session invalide"));
+        return userRepository.findById(userId).orElseThrow(() -> new UnauthorizedException("Session invalide"));
     }
 
     @Override

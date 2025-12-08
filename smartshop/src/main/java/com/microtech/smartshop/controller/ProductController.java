@@ -32,7 +32,7 @@ public class ProductController {
     private final ProductService productService;
     private final AuthService authService;
 
-    @Operation(summary = "Créer un produit", description = "Ajouter un nouveau produit au catalogue (ADMIN uniquement)")
+    @Operation(summary = "Créer un produit", description = "Ajouter un nouveau produit au catalogue")
     @PostMapping
     public ResponseEntity<ProductResponse> createProduct(@Valid @RequestBody ProductCreateRequest request) {
         User user = authService.getCurrentUser();
@@ -51,6 +51,7 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Modifier un produit", description = "Mettre à jour les informations d'un produit ")
     @PutMapping("/{id}")
     public ResponseEntity<ProductResponse> updateProduct(
             @PathVariable Long id,
@@ -65,6 +66,7 @@ public class ProductController {
     }
 
 
+    @Operation(summary = "Supprimer un produit", description = "Supprimer un produit du catalogue")
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> deleteProduct(@PathVariable Long id) {
         User user = authService.getCurrentUser();
@@ -78,15 +80,26 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Liste des produits", description = "Récupérer la liste paginée des produits avec filtres optionnels")
     @GetMapping
     public ResponseEntity<Map<String, Object>> getAllProducts(
             @RequestParam(required = false) String nom,
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "ASC") String sortDirection) {
 
+        if (size > 100) {
+            size = 100; 
+        }
+        if (size < 1) {
+            size = 10; 
+        }
+
         Sort.Direction direction = sortDirection.equalsIgnoreCase("DESC") ? Sort.Direction.DESC : Sort.Direction.ASC;
-        Pageable pageable = PageRequest.of(0, 10, Sort.by(direction, "id"));
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
 
         Page<ProductResponse> products = productService.getAllProducts(nom, minPrice, maxPrice, pageable);
         
@@ -96,6 +109,8 @@ public class ProductController {
         response.put("totalPages", products.getTotalPages());
         response.put("currentPage", products.getNumber());
         response.put("pageSize", products.getSize());
+        response.put("hasNext", products.hasNext());
+        response.put("hasPrevious", products.hasPrevious());
         
         return ResponseEntity.ok(response);
     }

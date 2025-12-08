@@ -1,9 +1,13 @@
 package com.microtech.smartshop.controller;
 
+import com.microtech.smartshop.dto.request.LoginRequest;
+import com.microtech.smartshop.dto.response.LoginResponse;
+import com.microtech.smartshop.dto.response.UserResponse;
 import com.microtech.smartshop.entity.User;
 import com.microtech.smartshop.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,27 +24,28 @@ public class AuthController {
     
     @Operation(summary = "Connexion", description = "Authentification d'un utilisateur ADMIN ou CLIENT")
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> login(@RequestBody Map<String, String> credentials) {
-        String username = credentials.get("username");
-        String password = credentials.get("password");
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+        User user = authService.login(request.getUsername(), request.getPassword());
         
-        User user = authService.login(username, password);
+        LoginResponse response = new LoginResponse(
+                user.getUsername(),
+                user.getRole().name()
+        );
         
-        return ResponseEntity.ok(Map.of(
-                "username", user.getUsername(),
-                "role", user.getRole().name()
-        ));
+        return ResponseEntity.ok(response);
     }
     
     @Operation(summary = "Utilisateur connecté", description = "Récupérer les informations de l'utilisateur connecté")
     @GetMapping("/me")
-    public ResponseEntity<Map<String, String>> getCurrentUser() {
+    public ResponseEntity<UserResponse> getCurrentUser() {
         User user = authService.getCurrentUser();
         
-        return ResponseEntity.ok(Map.of(
-                "username", user.getUsername(),
-                "role", user.getRole().name()
-        ));
+        UserResponse response = new UserResponse(
+                user.getUsername(),
+                user.getRole().name()
+        );
+        
+        return ResponseEntity.ok(response);
     }
     
     @Operation(summary = "Déconnexion", description = "Déconnexion de l'utilisateur et fermeture de la session")

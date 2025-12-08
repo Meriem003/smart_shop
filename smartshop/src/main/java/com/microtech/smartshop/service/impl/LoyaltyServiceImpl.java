@@ -22,9 +22,9 @@ public class LoyaltyServiceImpl implements LoyaltyService {
     private static final BigDecimal GOLD_MIN_ORDER = new BigDecimal("800");
     private static final BigDecimal PLATINUM_MIN_ORDER = new BigDecimal("1200");
 
-    private static final BigDecimal SILVER_DISCOUNT = new BigDecimal("0.05");  // 5%
-    private static final BigDecimal GOLD_DISCOUNT = new BigDecimal("0.10");    // 10%
-    private static final BigDecimal PLATINUM_DISCOUNT = new BigDecimal("0.15"); // 15%
+    private static final BigDecimal SILVER_DISCOUNT = new BigDecimal("0.05"); 
+    private static final BigDecimal GOLD_DISCOUNT = new BigDecimal("0.10");    
+    private static final BigDecimal PLATINUM_DISCOUNT = new BigDecimal("0.15"); 
 
     @Override
     public CustomerTier calculateTier(Integer totalOrders, BigDecimal totalSpent) {

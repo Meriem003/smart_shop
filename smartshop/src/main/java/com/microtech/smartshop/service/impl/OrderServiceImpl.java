@@ -17,6 +17,8 @@ import com.microtech.smartshop.service.LoyaltyService;
 import com.microtech.smartshop.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
@@ -28,6 +30,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
+    private static final String ORDER_NOT_FOUND_MESSAGE = "Commande non trouvée avec l'ID : ";
+    
     private final OrderRepository orderRepository;
     private final CustomerRepository customerRepository;
     private final ProductRepository productRepository;
@@ -90,7 +94,6 @@ public class OrderServiceImpl implements OrderService {
         CustomerTier tier = customer.getLoyaltyTier();
         BigDecimal remiseFidelite = loyaltyService.calculateLoyaltyDiscount(tier, sousTotal);
         montantRemise = montantRemise.add(remiseFidelite);
-
         PromoCode promoCode = null;
         if (request.getCodePromo() != null && !request.getCodePromo().trim().isEmpty()) {
             promoCode = promoCodeRepository.findByCode(request.getCodePromo())
@@ -189,7 +192,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponse confirmOrder(Long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Commande non trouvée avec l'ID : " + orderId));
+                        ORDER_NOT_FOUND_MESSAGE + orderId));
         if (order.getStatus() != OrderStatus.PENDING) {
             throw new BusinessRuleException(
                     "Impossible de confirmer la commande. Statut actuel : " + order.getStatus() +
@@ -211,7 +214,7 @@ public class OrderServiceImpl implements OrderService {
         
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Commande non trouvée avec l'ID : " + orderId));
+                        ORDER_NOT_FOUND_MESSAGE + orderId));
 
         if (order.getStatus() != OrderStatus.PENDING) {
             throw new BusinessRuleException(
@@ -219,8 +222,45 @@ public class OrderServiceImpl implements OrderService {
                     ". Seules les commandes PENDING peuvent être annulées.");
         }
 
+        for (OrderItem item : order.getItems()) {
+            Product product = item.getProduct();
+            product.setStockDisponible(product.getStockDisponible() + item.getQuantite());
+            productRepository.save(product);
+        }
+
+        Customer customer = order.getCustomer();
+        customer.setTotalOrders(Math.max(0, customer.getTotalOrders() - 1));
+        customer.setTotalSpent(customer.getTotalSpent().subtract(order.getTotalTTC())
+                .max(BigDecimal.ZERO));
+        updateCustomerTier(customer);
+        customerRepository.save(customer);
+
+        if (order.getPromoCode() != null) {
+            PromoCode promoCode = order.getPromoCode();
+            if (Boolean.TRUE.equals(promoCode.getUsageUnique()) && Boolean.TRUE.equals(promoCode.getUsed())) {
+                promoCode.setUsed(false);
+                promoCodeRepository.save(promoCode);
+            }
+        }
+
         order.setStatus(OrderStatus.CANCELED);
         Order savedOrder = orderRepository.save(order);
         return buildOrderResponse(savedOrder);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public OrderResponse getOrderById(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        ORDER_NOT_FOUND_MESSAGE + orderId));
+        return buildOrderResponse(order);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<OrderResponse> getAllOrders(Pageable pageable) {
+        return orderRepository.findAll(pageable)
+                .map(this::buildOrderResponse);
     }
 }

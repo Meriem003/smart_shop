@@ -19,6 +19,8 @@ import com.microtech.smartshop.repository.OrderRepository;
 import com.microtech.smartshop.repository.UserRepository;
 import com.microtech.smartshop.service.CustomerService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
@@ -113,10 +115,8 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<CustomerResponse> getAllCustomers() {
-        return customerRepository.findAll()
-                .stream()
-                .map(customerMapper::toResponse)
-                .toList();
+    public Page<CustomerResponse> getAllCustomers(Pageable pageable) {
+        return customerRepository.findAll(pageable)
+                .map(customerMapper::toResponse);
     }
 }

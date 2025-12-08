@@ -5,16 +5,20 @@ import com.microtech.smartshop.dto.request.PaymentEspecesRequest;
 import com.microtech.smartshop.dto.request.PaymentVirementRequest;
 import com.microtech.smartshop.dto.response.PaymentChequeResponse;
 import com.microtech.smartshop.dto.response.PaymentEspecesResponse;
+import com.microtech.smartshop.dto.response.PaymentResponse;
 import com.microtech.smartshop.dto.response.PaymentVirementResponse;
 import com.microtech.smartshop.entity.*;
 import com.microtech.smartshop.enums.OrderStatus;
 import com.microtech.smartshop.enums.PaymentStatus;
 import com.microtech.smartshop.exception.BusinessRuleException;
 import com.microtech.smartshop.exception.ResourceNotFoundException;
+import com.microtech.smartshop.mapper.PaymentMapper;
 import com.microtech.smartshop.repository.OrderRepository;
 import com.microtech.smartshop.repository.PaymentRepository;
 import com.microtech.smartshop.service.PaymentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
@@ -27,6 +31,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final OrderRepository orderRepository;
+    private final PaymentMapper paymentMapper;
     private static final BigDecimal LIMITE_ESPECES = new BigDecimal("20000");
 
     @Override
@@ -57,7 +62,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         updateOrderMontantRestant(order, request.getMontant());
 
-        return buildPaymentEspecesResponse((PaymentEspeces) savedPayment, order.getMontantRestant());
+        return paymentMapper.toEspecesResponse((PaymentEspeces) savedPayment, order.getMontantRestant());
     }
 
     @Override
@@ -83,7 +88,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         updateOrderMontantRestant(order, request.getMontant());
 
-        return buildPaymentChequeResponse((PaymentCheque) savedPayment, order.getMontantRestant());
+        return paymentMapper.toChequeResponse((PaymentCheque) savedPayment, order.getMontantRestant());
     }
 
     @Override
@@ -109,7 +114,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         updateOrderMontantRestant(order, request.getMontant());
 
-        return buildPaymentVirementResponse((PaymentVirement) savedPayment, order.getMontantRestant());
+        return paymentMapper.toVirementResponse((PaymentVirement) savedPayment, order.getMontantRestant());
     }
 
 
@@ -139,58 +144,33 @@ public class PaymentServiceImpl implements PaymentService {
                 .setScale(2, RoundingMode.HALF_UP);
 
         order.setMontantRestant(nouveauMontantRestant);
-        if (nouveauMontantRestant.compareTo(BigDecimal.ZERO) == 0) {
-            order.setStatus(OrderStatus.CONFIRMED);
-        }
-
         orderRepository.save(order);
     }
 
-    private PaymentEspecesResponse buildPaymentEspecesResponse(PaymentEspeces payment, BigDecimal montantRestant) {
-        return PaymentEspecesResponse.builder()
-                .id(payment.getId())
-                .numeroPayment(payment.getNumeroPayment())
-                .montant(payment.getMontant())
-                .datePayment(payment.getDatePayment())
-                .dateEncaissement(payment.getDateEncaissement())
-                .status(payment.getStatus())
-                .orderId(payment.getOrder().getId())
-                .montantRestant(montantRestant)
-                .typePaiement("ESPECES")
-                .numeroRecu(payment.getNumeroRecu())
-                .build();
-    }
-
-    private PaymentChequeResponse buildPaymentChequeResponse(PaymentCheque payment, BigDecimal montantRestant) {
-        return PaymentChequeResponse.builder()
-                .id(payment.getId())
-                .numeroPayment(payment.getNumeroPayment())
-                .montant(payment.getMontant())
-                .datePayment(payment.getDatePayment())
-                .dateEncaissement(payment.getDateEncaissement())
-                .status(payment.getStatus())
-                .orderId(payment.getOrder().getId())
-                .montantRestant(montantRestant)
-                .typePaiement("CHEQUE")
-                .numeroCheque(payment.getNumeroCheque())
-                .banque(payment.getBanque())
-                .dateEcheance(payment.getDateEcheance())
-                .build();
-    }
-
-    private PaymentVirementResponse buildPaymentVirementResponse(PaymentVirement payment, BigDecimal montantRestant) {
-        return PaymentVirementResponse.builder()
-                .id(payment.getId())
-                .numeroPayment(payment.getNumeroPayment())
-                .montant(payment.getMontant())
-                .datePayment(payment.getDatePayment())
-                .dateEncaissement(payment.getDateEncaissement())
-                .status(payment.getStatus())
-                .orderId(payment.getOrder().getId())
-                .montantRestant(montantRestant)
-                .typePaiement("VIREMENT")
-                .referenceVirement(payment.getReferenceVirement())
-                .banque(payment.getBanque())
-                .build();
+    @Override
+    @Transactional(readOnly = true)
+    public Page<PaymentResponse> getAllPayments(Pageable pageable) {
+        return paymentRepository.findAll(pageable)
+                .map(payment -> {
+                    PaymentResponse response = new PaymentResponse();
+                    response.setId(payment.getId());
+                    response.setNumeroPayment(payment.getNumeroPayment());
+                    response.setMontant(payment.getMontant());
+                    response.setDatePayment(payment.getDatePayment());
+                    response.setDateEncaissement(payment.getDateEncaissement());
+                    response.setStatus(payment.getStatus());
+                    response.setOrderId(payment.getOrder().getId());
+                    response.setMontantRestant(payment.getOrder().getMontantRestant());
+                    
+                    if (payment instanceof PaymentEspeces) {
+                        response.setTypePaiement("ESPECES");
+                    } else if (payment instanceof PaymentCheque) {
+                        response.setTypePaiement("CHEQUE");
+                    } else if (payment instanceof PaymentVirement) {
+                        response.setTypePaiement("VIREMENT");
+                    }
+                    
+                    return response;
+                });
     }
 }

@@ -18,7 +18,6 @@ public class AuthInterceptor implements HandlerInterceptor {
         if (session == null || session.getAttribute(USER_ID_SESSION_KEY) == null) {
             throw new UnauthorizedException("Authentification requise");
         }
-        
         return true;
     }
 }

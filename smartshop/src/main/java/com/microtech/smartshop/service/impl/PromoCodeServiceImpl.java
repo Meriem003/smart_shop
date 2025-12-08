@@ -3,17 +3,17 @@ package com.microtech.smartshop.service.impl;
 import com.microtech.smartshop.dto.request.PromoCodeCreateRequest;
 import com.microtech.smartshop.dto.response.PromoCodeResponse;
 import com.microtech.smartshop.entity.PromoCode;
-import com.microtech.smartshop.exception.BusinessRuleException;
 import com.microtech.smartshop.exception.ResourceNotFoundException;
 import com.microtech.smartshop.exception.ValidationException;
 import com.microtech.smartshop.mapper.PromoCodeMapper;
 import com.microtech.smartshop.repository.PromoCodeRepository;
 import com.microtech.smartshop.service.PromoCodeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -49,11 +49,9 @@ public class PromoCodeServiceImpl implements PromoCodeService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<PromoCodeResponse> getAllPromoCodes() {
-        return promoCodeRepository.findAll()
-                .stream()
-                .map(promoCodeMapper::toResponse)
-                .toList();
+    public Page<PromoCodeResponse> getAllPromoCodes(Pageable pageable) {
+        return promoCodeRepository.findAll(pageable)
+                .map(promoCodeMapper::toResponse);
     }
 
     @Override
@@ -78,19 +76,5 @@ public class PromoCodeServiceImpl implements PromoCodeService {
             throw new ResourceNotFoundException("PromoCode", "id", id);
         }
         promoCodeRepository.deleteById(id);
-    }
-
-    @Override
-    public PromoCodeResponse validateAndUsePromoCode(String code) {
-        PromoCode promoCode = promoCodeRepository.findByCode(code)
-                .orElseThrow(() -> new ResourceNotFoundException("Code promo invalide: " + code));
-
-        if (promoCode.getUsageUnique() && promoCode.getUsed()) {
-            throw new BusinessRuleException("Ce code promo a déjà été utilisé");
-        }
-        promoCode.setUsed(true);
-        PromoCode updated = promoCodeRepository.save(promoCode);
-
-        return promoCodeMapper.toResponse(updated);
     }
 }
