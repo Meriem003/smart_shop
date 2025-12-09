@@ -2,13 +2,13 @@ package com.microtech.smartshop.service.impl;
 
 import com.microtech.smartshop.dto.request.CreateOrderRequest;
 import com.microtech.smartshop.dto.request.OrderItemRequest;
-import com.microtech.smartshop.dto.response.OrderItemResponse;
 import com.microtech.smartshop.dto.response.OrderResponse;
 import com.microtech.smartshop.entity.*;
 import com.microtech.smartshop.enums.CustomerTier;
 import com.microtech.smartshop.enums.OrderStatus;
 import com.microtech.smartshop.exception.BusinessRuleException;
 import com.microtech.smartshop.exception.ResourceNotFoundException;
+import com.microtech.smartshop.mapper.OrderMapper;
 import com.microtech.smartshop.repository.CustomerRepository;
 import com.microtech.smartshop.repository.OrderRepository;
 import com.microtech.smartshop.repository.ProductRepository;
@@ -37,6 +37,7 @@ public class OrderServiceImpl implements OrderService {
     private final ProductRepository productRepository;
     private final PromoCodeRepository promoCodeRepository;
     private final LoyaltyService loyaltyService;
+    private final OrderMapper orderMapper;
 
     @Value("${app.tva.taux}")
     private BigDecimal tauxTVA;
@@ -94,6 +95,7 @@ public class OrderServiceImpl implements OrderService {
         CustomerTier tier = customer.getLoyaltyTier();
         BigDecimal remiseFidelite = loyaltyService.calculateLoyaltyDiscount(tier, sousTotal);
         montantRemise = montantRemise.add(remiseFidelite);
+
         PromoCode promoCode = null;
         if (request.getCodePromo() != null && !request.getCodePromo().trim().isEmpty()) {
             promoCode = promoCodeRepository.findByCode(request.getCodePromo())
@@ -112,7 +114,6 @@ public class OrderServiceImpl implements OrderService {
             BigDecimal remisePromo = sousTotal.multiply(promoCode.getPourcentageRemise())
                     .setScale(2, RoundingMode.HALF_UP);
             montantRemise = montantRemise.add(remisePromo);
-
             order.setPromoCode(promoCode);
             order.setCodePromo(promoCode.getCode());
 
@@ -144,47 +145,16 @@ public class OrderServiceImpl implements OrderService {
             product.setStockDisponible(product.getStockDisponible() - item.getQuantite());
             productRepository.save(product);
         }
+
         customer.setTotalOrders(customer.getTotalOrders() + 1);
         customer.setTotalSpent(customer.getTotalSpent().add(totalTTC));
         updateCustomerTier(customer);
         customerRepository.save(customer);
-        return buildOrderResponse(savedOrder);
+        return orderMapper.toResponse(savedOrder);
     }
 
     private void updateCustomerTier(Customer customer) {
         loyaltyService.updateCustomerTier(customer);
-    }
-
-    private OrderResponse buildOrderResponse(Order order) {
-        List<OrderItemResponse> itemResponses = new ArrayList<>();
-
-        for (OrderItem item : order.getItems()) {
-            OrderItemResponse itemResponse = OrderItemResponse.builder()
-                    .id(item.getId())
-                    .productId(item.getProduct().getId())
-                    .productNom(item.getProduct().getNom())
-                    .quantite(item.getQuantite())
-                    .prixUnitaire(item.getPrixUnitaire())
-                    .totalLigne(item.getTotalLigne())
-                    .build();
-            itemResponses.add(itemResponse);
-        }
-
-        return OrderResponse.builder()
-                .id(order.getId())
-                .dateCommande(order.getDateCommande())
-                .customerId(order.getCustomer().getId())
-                .customerNom(order.getCustomer().getNom())
-                .items(itemResponses)
-                .sousTotal(order.getSousTotal())
-                .montantRemise(order.getMontantRemise())
-                .montantHT(order.getMontantHT())
-                .montantTVA(order.getMontantTVA())
-                .totalTTC(order.getTotalTTC())
-                .status(order.getStatus())
-                .codePromo(order.getCodePromo())
-                .tauxTVA(order.getTauxTVA())
-                .build();
     }
 
     @Override
@@ -205,7 +175,7 @@ public class OrderServiceImpl implements OrderService {
         }
         order.setStatus(OrderStatus.CONFIRMED);
         Order savedOrder = orderRepository.save(order);
-        return buildOrderResponse(savedOrder);
+        return orderMapper.toResponse(savedOrder);
     }
 
     @Override
@@ -245,7 +215,7 @@ public class OrderServiceImpl implements OrderService {
 
         order.setStatus(OrderStatus.CANCELED);
         Order savedOrder = orderRepository.save(order);
-        return buildOrderResponse(savedOrder);
+        return orderMapper.toResponse(savedOrder);
     }
 
     @Override
@@ -254,13 +224,13 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         ORDER_NOT_FOUND_MESSAGE + orderId));
-        return buildOrderResponse(order);
+        return orderMapper.toResponse(order);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<OrderResponse> getAllOrders(Pageable pageable) {
         return orderRepository.findAll(pageable)
-                .map(this::buildOrderResponse);
+                .map(orderMapper::toResponse);
     }
 }

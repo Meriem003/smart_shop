@@ -28,10 +28,6 @@ public class PromoCodeServiceImpl implements PromoCodeService {
         if (promoCodeRepository.existsByCode(request.getCode())) {
             throw new ValidationException("Un code promo avec ce code existe déjà: " + request.getCode());
         }
-
-        if (!request.getCode().matches("PROMO-[A-Z0-9]{4}")) {
-            throw new ValidationException("Format de code promo invalide. Format attendu: PROMO-XXXX");
-        }
         BigDecimal pourcentageDecimal = request.getPourcentageRemise() != null
                 ? request.getPourcentageRemise().divide(new BigDecimal("100"))
                 : new BigDecimal("0.05");
@@ -39,7 +35,7 @@ public class PromoCodeServiceImpl implements PromoCodeService {
         PromoCode promoCode = PromoCode.builder()
                 .code(request.getCode())
                 .pourcentageRemise(pourcentageDecimal)
-                .usageUnique(request.getUsageUnique() != null && request.getUsageUnique())
+                .usageUnique(request.getUsageUnique() != null ? request.getUsageUnique() : true)
                 .used(false)
                 .build();
 

@@ -151,26 +151,6 @@ public class PaymentServiceImpl implements PaymentService {
     @Transactional(readOnly = true)
     public Page<PaymentResponse> getAllPayments(Pageable pageable) {
         return paymentRepository.findAll(pageable)
-                .map(payment -> {
-                    PaymentResponse response = new PaymentResponse();
-                    response.setId(payment.getId());
-                    response.setNumeroPayment(payment.getNumeroPayment());
-                    response.setMontant(payment.getMontant());
-                    response.setDatePayment(payment.getDatePayment());
-                    response.setDateEncaissement(payment.getDateEncaissement());
-                    response.setStatus(payment.getStatus());
-                    response.setOrderId(payment.getOrder().getId());
-                    response.setMontantRestant(payment.getOrder().getMontantRestant());
-                    
-                    if (payment instanceof PaymentEspeces) {
-                        response.setTypePaiement("ESPECES");
-                    } else if (payment instanceof PaymentCheque) {
-                        response.setTypePaiement("CHEQUE");
-                    } else if (payment instanceof PaymentVirement) {
-                        response.setTypePaiement("VIREMENT");
-                    }
-                    
-                    return response;
-                });
+                .map(paymentMapper::toResponse);
     }
 }
