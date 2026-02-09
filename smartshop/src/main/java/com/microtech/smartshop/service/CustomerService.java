@@ -15,5 +15,5 @@ public interface CustomerService {
     CustomerResponse updateCustomer(Long customerId, CustomerUpdateRequest request);
     CustomerStatsResponse getCustomerStats(Long customerId);
     List<OrderResponse> getCustomerOrderHistory(Long customerId);
-    Page<CustomerResponse> getAllCustomers(Pageable pageable);
+    Page<CustomerResponse> getAllCustomers(String nom, Pageable pageable);
 }

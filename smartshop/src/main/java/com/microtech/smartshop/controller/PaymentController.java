@@ -7,10 +7,6 @@ import com.microtech.smartshop.dto.response.PaymentChequeResponse;
 import com.microtech.smartshop.dto.response.PaymentEspecesResponse;
 import com.microtech.smartshop.dto.response.PaymentResponse;
 import com.microtech.smartshop.dto.response.PaymentVirementResponse;
-import com.microtech.smartshop.entity.User;
-import com.microtech.smartshop.enums.UserRole;
-import com.microtech.smartshop.exception.ForbiddenException;
-import com.microtech.smartshop.service.AuthService;
 import com.microtech.smartshop.service.PaymentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -34,16 +30,10 @@ import java.util.Map;
 public class PaymentController {
 
     private final PaymentService paymentService;
-    private final AuthService authService;
 
     @Operation(summary = "Paiement en espèces", description = "Enregistrer un paiement en espèces pour une commande")
     @PostMapping("/especes")
     public ResponseEntity<PaymentEspecesResponse> addPaymentEspeces(@Valid @RequestBody PaymentEspecesRequest request) {
-        User user = authService.getCurrentUser();
-        if (user.getRole() != UserRole.ADMIN) {
-            throw new ForbiddenException("Accès réservé aux administrateurs");
-        }
-        
         PaymentEspecesResponse response = paymentService.addPaymentEspeces(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -51,39 +41,24 @@ public class PaymentController {
     @Operation(summary = "Paiement par chèque", description = "Enregistrer un paiement par chèque avec numéro et banque")
     @PostMapping("/cheque")
     public ResponseEntity<PaymentChequeResponse> addPaymentCheque(@Valid @RequestBody PaymentChequeRequest request) {
-        User user = authService.getCurrentUser();
-        if (user.getRole() != UserRole.ADMIN) {
-            throw new ForbiddenException("Accès réservé aux administrateurs");
-        }
-        
         PaymentChequeResponse response = paymentService.addPaymentCheque(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
-    
 
     @Operation(summary = "Paiement par virement", description = "Enregistrer un paiement par virement bancaire")
     @PostMapping("/virement")
     public ResponseEntity<PaymentVirementResponse> addPaymentVirement(@Valid @RequestBody PaymentVirementRequest request) {
-        User user = authService.getCurrentUser();
-        if (user.getRole() != UserRole.ADMIN) {
-            throw new ForbiddenException("Accès réservé aux administrateurs");
-        }
-        
         PaymentVirementResponse response = paymentService.addPaymentVirement(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @Operation(summary = "Liste des paiements", description = "Récupérer la liste paginée de tous les paiements (ADMIN uniquement)")
+    @Operation(summary = "Liste des paiements", description = "Récupérer la liste paginée de tous les paiements")
     @GetMapping
     public ResponseEntity<Map<String, Object>> getAllPayments(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "datePayment") String sortBy,
             @RequestParam(defaultValue = "DESC") String sortDirection) {
-        User user = authService.getCurrentUser();
-        if (user.getRole() != UserRole.ADMIN) {
-            throw new ForbiddenException("Accès réservé aux administrateurs");
-        }
         
         if (size > 100) size = 100;
         if (size < 1) size = 10;

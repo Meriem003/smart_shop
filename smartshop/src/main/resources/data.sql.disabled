@@ -1,0 +1,25 @@
+-- Script d'initialisation des données de test
+-- Exécuté automatiquement par Spring Boot au démarrage
+
+-- Insertion de clients de test
+INSERT INTO customers (nom, email, loyalty_tier, total_orders, total_spent) VALUES ('Ahmed Berrada', 'ahmed.berrada@gmail.com', 'GOLD', 15, 2500.00);
+INSERT INTO customers (nom, email, loyalty_tier, total_orders, total_spent) VALUES ('Fatima Alaoui', 'fatima.alaoui@gmail.com', 'SILVER', 8, 1200.00);
+INSERT INTO customers (nom, email, loyalty_tier, total_orders, total_spent) VALUES ('Mohamed Bennani', 'mohamed.bennani@gmail.com', 'BASIC', 3, 450.00);
+INSERT INTO customers (nom, email, loyalty_tier, total_orders, total_spent) VALUES ('Aicha Mansouri', 'aicha.mansouri@gmail.com', 'PLATINUM', 25, 5800.00);
+INSERT INTO customers (nom, email, loyalty_tier, total_orders, total_spent) VALUES ('Youssef Tazi', 'youssef.tazi@gmail.com', 'BASIC', 1, 150.00);
+
+-- Insertion de produits de test
+INSERT INTO products (nom, prix_unitaire, stock_disponible, deleted) VALUES ('Laptop HP ProBook 450', 8500.00, 15, false);
+INSERT INTO products (nom, prix_unitaire, stock_disponible, deleted) VALUES ('Souris sans fil Logitech', 250.00, 50, false);
+INSERT INTO products (nom, prix_unitaire, stock_disponible, deleted) VALUES ('Clavier mécanique', 680.00, 25, false);
+INSERT INTO products (nom, prix_unitaire, stock_disponible, deleted) VALUES ('Écran Dell 24 pouces', 1200.00, 12, false);
+INSERT INTO products (nom, prix_unitaire, stock_disponible, deleted) VALUES ('Câble USB-C', 120.00, 100, false);
+INSERT INTO products (nom, prix_unitaire, stock_disponible, deleted) VALUES ('SSD Samsung 512GB', 450.00, 30, false);
+INSERT INTO products (nom, prix_unitaire, stock_disponible, deleted) VALUES ('Webcam HD', 380.00, 20, false);
+INSERT INTO products (nom, prix_unitaire, stock_disponible, deleted) VALUES ('Casque Bluetooth', 750.00, 18, false);
+
+-- Insertion de codes promo de test
+INSERT INTO promo_codes (code, pourcentage_remise, active, usage_unique, used) VALUES ('PROMO-WE10', 0.10, true, false, false);
+INSERT INTO promo_codes (code, pourcentage_remise, active, usage_unique, used) VALUES ('PROMO-SU20', 0.20, true, true, false);
+INSERT INTO promo_codes (code, pourcentage_remise, active, usage_unique, used) VALUES ('PROMO-FI05', 0.05, true, true, true);
+INSERT INTO promo_codes (code, pourcentage_remise, active, usage_unique, used) VALUES ('PROMO-BU15', 0.15, true, false, false);

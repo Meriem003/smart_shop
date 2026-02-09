@@ -22,6 +22,7 @@ import static org.mockito.Mockito.*;
 
 
 @ExtendWith(MockitoExtension.class)
+//integration Mockito m3a JUnit 5
 class PromoCodeServiceTest {
 
     @Mock
@@ -39,7 +40,6 @@ class PromoCodeServiceTest {
         PromoCodeCreateRequest request = new PromoCodeCreateRequest();
         request.setCode("PROMO-TEST");
         when(promoCodeRepository.existsByCode("PROMO-TEST")).thenReturn(true);
-
         assertThrows(ValidationException.class, () -> promoCodeService.createPromoCode(request));
     }
 
@@ -47,7 +47,6 @@ class PromoCodeServiceTest {
     void test2_creerCodePromo_erreur_si_format_invalide() {
         PromoCodeCreateRequest request = new PromoCodeCreateRequest();
         request.setCode("INVALID");
-        when(promoCodeRepository.existsByCode("INVALID")).thenReturn(false);
 
         assertThrows(ValidationException.class, () -> promoCodeService.createPromoCode(request));
     }
@@ -96,4 +95,5 @@ class PromoCodeServiceTest {
         assertNotNull(result);
         assertEquals("PROMO-TEST", result.getCode());
     }
+
 }

@@ -17,8 +17,8 @@ public class PromoCodeCreateRequest {
     @Pattern(regexp = "PROMO-[A-Z0-9]{4}")
     private String code;
 
-    @DecimalMin(value = "1")
-    @DecimalMax(value = "100")
+    @DecimalMin(value = "1.0")
+    @DecimalMax(value = "100.0")
     private BigDecimal pourcentageRemise;
 
     private Boolean usageUnique;

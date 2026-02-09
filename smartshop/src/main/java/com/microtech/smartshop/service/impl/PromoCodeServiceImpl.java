@@ -25,6 +25,10 @@ public class PromoCodeServiceImpl implements PromoCodeService {
 
     @Override
     public PromoCodeResponse createPromoCode(PromoCodeCreateRequest request) {
+        if (!request.getCode().matches("^PROMO-[A-Z0-9]+$")) {
+            throw new ValidationException("Format de code promo invalide. Le code doit commencer par 'PROMO-' suivi de lettres majuscules ou chiffres.");
+        }
+        
         if (promoCodeRepository.existsByCode(request.getCode())) {
             throw new ValidationException("Un code promo avec ce code existe déjà: " + request.getCode());
         }

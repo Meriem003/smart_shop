@@ -3,10 +3,6 @@ package com.microtech.smartshop.controller;
 import com.microtech.smartshop.dto.request.ProductCreateRequest;
 import com.microtech.smartshop.dto.request.ProductUpdateRequest;
 import com.microtech.smartshop.dto.response.ProductResponse;
-import com.microtech.smartshop.entity.User;
-import com.microtech.smartshop.enums.UserRole;
-import com.microtech.smartshop.exception.ForbiddenException;
-import com.microtech.smartshop.service.AuthService;
 import com.microtech.smartshop.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -30,16 +26,10 @@ import java.util.Map;
 public class ProductController {
 
     private final ProductService productService;
-    private final AuthService authService;
 
     @Operation(summary = "Créer un produit", description = "Ajouter un nouveau produit au catalogue")
     @PostMapping
     public ResponseEntity<ProductResponse> createProduct(@Valid @RequestBody ProductCreateRequest request) {
-        User user = authService.getCurrentUser();
-        if (user.getRole() != UserRole.ADMIN) {
-            throw new ForbiddenException("Accès réservé aux administrateurs");
-        }
-        
         ProductResponse response = productService.createProduct(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -51,29 +41,18 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Modifier un produit", description = "Mettre à jour les informations d'un produit ")
+    @Operation(summary = "Modifier un produit", description = "Mettre à jour les informations d'un produit")
     @PutMapping("/{id}")
     public ResponseEntity<ProductResponse> updateProduct(
             @PathVariable Long id,
             @Valid @RequestBody ProductUpdateRequest request) {
-        User user = authService.getCurrentUser();
-        if (user.getRole() != UserRole.ADMIN) {
-            throw new ForbiddenException("Accès réservé aux administrateurs");
-        }
-        
         ProductResponse response = productService.updateProduct(id, request);
         return ResponseEntity.ok(response);
     }
 
-
     @Operation(summary = "Supprimer un produit", description = "Supprimer un produit du catalogue")
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> deleteProduct(@PathVariable Long id) {
-        User user = authService.getCurrentUser();
-        if (user.getRole() != UserRole.ADMIN) {
-            throw new ForbiddenException("Accès réservé aux administrateurs");
-        }
-        
         productService.deleteProduct(id);
         Map<String, String> response = new HashMap<>();
         response.put("message", "Produit supprimé avec succès");
@@ -91,12 +70,8 @@ public class ProductController {
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "ASC") String sortDirection) {
 
-        if (size > 100) {
-            size = 100; 
-        }
-        if (size < 1) {
-            size = 10; 
-        }
+        if (size > 100) size = 100;
+        if (size < 1) size = 10;
 
         Sort.Direction direction = sortDirection.equalsIgnoreCase("DESC") ? Sort.Direction.DESC : Sort.Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));

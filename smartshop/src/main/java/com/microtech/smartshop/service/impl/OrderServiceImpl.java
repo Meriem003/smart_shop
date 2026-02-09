@@ -25,6 +25,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -228,9 +229,17 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Page<OrderResponse> getAllOrders(Pageable pageable) {
         return orderRepository.findAll(pageable)
                 .map(orderMapper::toResponse);
     }
+
+    @Override
+    public List<OrderResponse> getCommandeNoPaiment() {
+        return orderRepository.findAll().stream()
+                .filter(order -> order.getStatus().equals(OrderStatus.PENDING))
+                .map(orderMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+    
 }

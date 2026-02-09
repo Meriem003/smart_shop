@@ -2,10 +2,6 @@ package com.microtech.smartshop.controller;
 
 import com.microtech.smartshop.dto.request.CreateOrderRequest;
 import com.microtech.smartshop.dto.response.OrderResponse;
-import com.microtech.smartshop.entity.User;
-import com.microtech.smartshop.enums.UserRole;
-import com.microtech.smartshop.exception.ForbiddenException;
-import com.microtech.smartshop.service.AuthService;
 import com.microtech.smartshop.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,28 +25,17 @@ import java.util.Map;
 public class OrderController {
 
     private final OrderService orderService;
-    private final AuthService authService;
 
-    @Operation(summary = "Créer une commande", description = "Créer une commande multi-produits avec calculs automatiques (ADMIN uniquement)")
+    @Operation(summary = "Créer une commande", description = "Créer une commande multi-produits avec calculs automatiques")
     @PostMapping
     public ResponseEntity<OrderResponse> createOrder(@Valid @RequestBody CreateOrderRequest request) {
-        User user = authService.getCurrentUser();
-        if (user.getRole() != UserRole.ADMIN) {
-            throw new ForbiddenException("Accès réservé aux administrateurs");
-        }
-        
         OrderResponse response = orderService.createOrder(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @Operation(summary = "Valider une commande", description = "Confirmer une commande après paiement complet (ADMIN uniquement)")
+    @Operation(summary = "Valider une commande", description = "Confirmer une commande après paiement complet")
     @PutMapping("/{orderId}/confirm")
     public ResponseEntity<OrderResponse> confirmOrder(@PathVariable Long orderId) {
-        User user = authService.getCurrentUser();
-        if (user.getRole() != UserRole.ADMIN) {
-            throw new ForbiddenException("Accès réservé aux administrateurs");
-        }
-        
         OrderResponse response = orderService.confirmOrder(orderId);
         return ResponseEntity.ok(response);
     }
@@ -58,38 +43,24 @@ public class OrderController {
     @Operation(summary = "Annuler une commande", description = "Annuler une commande en attente ou confirmée")
     @PutMapping("/{orderId}/cancel")
     public ResponseEntity<OrderResponse> cancelOrder(@PathVariable Long orderId) {
-        User user = authService.getCurrentUser();
-        if (user.getRole() != UserRole.ADMIN) {
-            throw new ForbiddenException("Accès réservé aux administrateurs");
-        }
-        
         OrderResponse response = orderService.cancelOrder(orderId);
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Consulter une commande", description = "Récupérer les détails d'une commande par son ID (ADMIN uniquement)")
+    @Operation(summary = "Consulter une commande", description = "Récupérer les détails d'une commande par son ID")
     @GetMapping("/{orderId}")
     public ResponseEntity<OrderResponse> getOrderById(@PathVariable Long orderId) {
-        User user = authService.getCurrentUser();
-        if (user.getRole() != UserRole.ADMIN) {
-            throw new ForbiddenException("Accès réservé aux administrateurs");
-        }
-        
         OrderResponse response = orderService.getOrderById(orderId);
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "Liste des commandes", description = "Récupérer la liste paginée de toutes les commandes (ADMIN uniquement)")
+    @Operation(summary = "Liste des commandes", description = "Récupérer la liste paginée de toutes les commandes")
     @GetMapping
     public ResponseEntity<Map<String, Object>> getAllOrders(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "dateCommande") String sortBy,
             @RequestParam(defaultValue = "DESC") String sortDirection) {
-        User user = authService.getCurrentUser();
-        if (user.getRole() != UserRole.ADMIN) {
-            throw new ForbiddenException("Accès réservé aux administrateurs");
-        }
         
         if (size > 100) size = 100;
         if (size < 1) size = 10;

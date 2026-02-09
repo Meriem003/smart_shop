@@ -37,10 +37,6 @@
     </properties>
 
     <dependencies>
-        <!-- ========================================= -->
-        <!-- SPRING BOOT STARTERS                      -->
-        <!-- ========================================= -->
-
         <!-- Spring Boot Web : REST API -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -53,7 +49,7 @@
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
 
-        <!-- Validation : Annotations @NotNull, @Valid, etc. -->
+        <!-- Validation : Annotations @NotNull, @Valid -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
@@ -67,10 +63,6 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- ========================================= -->
-        <!-- BASES DE DONNÉES                          -->
-        <!-- ========================================= -->
-
         <!-- MySQL Driver (Laragon) -->
         <dependency>
             <groupId>com.mysql</groupId>
@@ -79,24 +71,14 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- PostgreSQL Driver (Alternative) -->
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>${postgresql.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-
-        <!-- H2 Database : Pour les tests -->
+        <!-- H2 Database : Pour les tests et développement -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <scope>test</scope>
+            <scope>runtime</scope>
         </dependency>
 
-        <!-- ========================================= -->
         <!-- LOMBOK : Réduction du code boilerplate    -->
-        <!-- ========================================= -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -104,9 +86,7 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- ========================================= -->
         <!-- MAPSTRUCT : Mapping DTO <-> Entity        -->
-        <!-- ========================================= -->
         <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
@@ -121,19 +101,14 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- ========================================= -->
         <!-- SWAGGER / SPRINGDOC : Documentation API   -->
-        <!-- ========================================= -->
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>${springdoc.version}</version>
         </dependency>
 
-        <!-- ========================================= -->
-        <!-- TESTS UNITAIRES                           -->
-        <!-- ========================================= -->
-
+        <!-- TESTS UNITAIRES                      -->
         <!-- Spring Boot Test : JUnit 5 + Mockito -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -141,8 +116,6 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- JUnit 5 (Inclus dans spring-boot-starter-test) -->
-        <!-- Mockito (Inclus dans spring-boot-starter-test) -->
 
         <!-- AssertJ : Assertions fluides pour tests -->
         <dependency>
@@ -150,10 +123,6 @@
             <artifactId>assertj-core</artifactId>
             <scope>test</scope>
         </dependency>
-
-        <!-- ========================================= -->
-        <!-- UTILITAIRES                               -->
-        <!-- ========================================= -->
 
         <!-- Apache Commons Lang : Utilitaires String, etc. -->
         <dependency>
@@ -169,9 +138,7 @@
 
     </dependencies>
 
-    <!-- ========================================= -->
-    <!-- BUILD PLUGINS                             -->
-    <!-- ========================================= -->
+
     <build>
         <plugins>
             <!-- Plugin Spring Boot : Packaging JAR exécutable -->
@@ -209,7 +176,7 @@
                             <artifactId>mapstruct-processor</artifactId>
                             <version>${mapstruct.version}</version>
                         </path>
-                        <!-- Binding Lombok + MapStruct (Important !) -->
+                        <!-- Binding Lombok + MapStruct -->
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok-mapstruct-binding</artifactId>

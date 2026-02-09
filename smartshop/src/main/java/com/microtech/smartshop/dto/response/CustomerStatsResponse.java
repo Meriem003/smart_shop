@@ -15,7 +15,6 @@ public class CustomerStatsResponse {
     private Long customerId;
     private String nom;
     private String email;
-    private String username;
     private CustomerTier loyaltyTier;
     private Integer totalOrders;
     private BigDecimal totalSpent;

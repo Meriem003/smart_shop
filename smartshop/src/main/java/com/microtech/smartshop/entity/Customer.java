@@ -44,10 +44,6 @@ public class Customer {
     @Builder.Default
     private BigDecimal totalSpent = BigDecimal.ZERO;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "user_id", unique = true)
-    private User user;
-
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
     @Builder.Default
     private List<Order> orders = new ArrayList<>();

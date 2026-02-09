@@ -2,10 +2,6 @@ package com.microtech.smartshop.controller;
 
 import com.microtech.smartshop.dto.request.PromoCodeCreateRequest;
 import com.microtech.smartshop.dto.response.PromoCodeResponse;
-import com.microtech.smartshop.entity.User;
-import com.microtech.smartshop.enums.UserRole;
-import com.microtech.smartshop.exception.ForbiddenException;
-import com.microtech.smartshop.service.AuthService;
 import com.microtech.smartshop.service.PromoCodeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,17 +25,11 @@ import java.util.Map;
 public class PromoCodeController {
 
     private final PromoCodeService promoCodeService;
-    private final AuthService authService;
 
     @Operation(summary = "Créer un code promo", description = "Créer un nouveau code promotionnel avec pourcentage et dates")
     @PostMapping
     public ResponseEntity<PromoCodeResponse> createPromoCode(
             @Valid @RequestBody PromoCodeCreateRequest request) {
-        User user = authService.getCurrentUser();
-        if (user.getRole() != UserRole.ADMIN) {
-            throw new ForbiddenException("Accès réservé aux administrateurs");
-        }
-        
         PromoCodeResponse response = promoCodeService.createPromoCode(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -51,10 +41,6 @@ public class PromoCodeController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "ASC") String sortDirection) {
-        User user = authService.getCurrentUser();
-        if (user.getRole() != UserRole.ADMIN) {
-            throw new ForbiddenException("Accès réservé aux administrateurs");
-        }
         
         if (size > 100) size = 100;
         if (size < 1) size = 10;
@@ -79,10 +65,6 @@ public class PromoCodeController {
     @Operation(summary = "Consulter un code promo", description = "Récupérer un code promo par ID")
     @GetMapping("/{id}")
     public ResponseEntity<PromoCodeResponse> getPromoCodeById(@PathVariable Long id) {
-        User user = authService.getCurrentUser();
-        if (user.getRole() != UserRole.ADMIN) {
-            throw new ForbiddenException("Accès réservé aux administrateurs");
-        }
         PromoCodeResponse response = promoCodeService.getPromoCodeById(id);
         return ResponseEntity.ok(response);
     }
@@ -90,10 +72,6 @@ public class PromoCodeController {
     @Operation(summary = "Rechercher par code", description = "Récupérer un code promo par son code textuel")
     @GetMapping("/code/{code}")
     public ResponseEntity<PromoCodeResponse> getPromoCodeByCode(@PathVariable String code) {
-        User user = authService.getCurrentUser();
-        if (user.getRole() != UserRole.ADMIN) {
-            throw new ForbiddenException("Accès réservé aux administrateurs");
-        }
         PromoCodeResponse response = promoCodeService.getPromoCodeByCode(code);
         return ResponseEntity.ok(response);
     }
@@ -101,11 +79,6 @@ public class PromoCodeController {
     @Operation(summary = "Supprimer un code promo", description = "Supprimer un code promotionnel")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePromoCode(@PathVariable Long id) {
-        User user = authService.getCurrentUser();
-        if (user.getRole() != UserRole.ADMIN) {
-            throw new ForbiddenException("Accès réservé aux administrateurs");
-        }
-        
         promoCodeService.deletePromoCode(id);
         return ResponseEntity.noContent().build();
     }

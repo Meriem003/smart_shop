@@ -1,0 +1,80 @@
+export const LOYALTY_TIERS = {
+  BASIC: 'BASIC',
+  SILVER: 'SILVER',
+  GOLD: 'GOLD',
+  PLATINUM: 'PLATINUM',
+};
+
+export const LOYALTY_TIER_LABELS = {
+  [LOYALTY_TIERS.BASIC]: 'Basique',
+  [LOYALTY_TIERS.SILVER]: 'Argent',
+  [LOYALTY_TIERS.GOLD]: 'Or',
+  [LOYALTY_TIERS.PLATINUM]: 'Platine',
+};
+
+export const ORDER_STATUS = {
+  PENDING: 'PENDING',
+  CONFIRMED: 'CONFIRMED',
+  CANCELED: 'CANCELED',
+  REJECTED: 'REJECTED',
+};
+
+export const ORDER_STATUS_LABELS = {
+  [ORDER_STATUS.PENDING]: 'En attente',
+  [ORDER_STATUS.CONFIRMED]: 'Confirmée',
+  [ORDER_STATUS.CANCELED]: 'Annulée',
+  [ORDER_STATUS.REJECTED]: 'Rejetée',
+};
+
+export const ORDER_STATUS_COLORS = {
+  [ORDER_STATUS.PENDING]: 'warning',
+  [ORDER_STATUS.CONFIRMED]: 'success',
+  [ORDER_STATUS.CANCELED]: 'danger',
+  [ORDER_STATUS.REJECTED]: 'danger',
+};
+
+export const PAYMENT_STATUS = {
+  EN_ATTENTE: 'EN_ATTENTE',
+  ENCAISSE: 'ENCAISSÉ',
+  REJETE: 'REJETÉ',
+};
+
+export const PAYMENT_STATUS_LABELS = {
+  [PAYMENT_STATUS.EN_ATTENTE]: 'En attente',
+  [PAYMENT_STATUS.ENCAISSE]: 'Encaissé',
+  [PAYMENT_STATUS.REJETE]: 'Rejeté',
+};
+
+export const PAYMENT_TYPES = {
+  ESPECES: 'ESPECES',
+  CHEQUE: 'CHEQUE',
+  VIREMENT: 'VIREMENT',
+};
+
+export const PAYMENT_TYPE_LABELS = {
+  [PAYMENT_TYPES.ESPECES]: 'Espèces',
+  [PAYMENT_TYPES.CHEQUE]: 'Chèque',
+  [PAYMENT_TYPES.VIREMENT]: 'Virement',
+};
+
+export const TVA_RATE = 0.2;
+
+export const LOYALTY_DISCOUNTS = {
+  [LOYALTY_TIERS.BASIC]: 0,
+  [LOYALTY_TIERS.SILVER]: 0.05,
+  [LOYALTY_TIERS.GOLD]: 0.1,
+  [LOYALTY_TIERS.PLATINUM]: 0.15,
+};
+
+export const LOYALTY_THRESHOLDS = {
+  [LOYALTY_TIERS.SILVER]: 500,
+  [LOYALTY_TIERS.GOLD]: 800,
+  [LOYALTY_TIERS.PLATINUM]: 1200,
+};
+
+export const PROMO_DISCOUNT_RATE = 0.05;
+
+export const CASH_PAYMENT_LIMIT = 20000;
+
+export const DEFAULT_PAGE_SIZE = 10;
+export const PAGE_SIZE_OPTIONS = [5, 10, 20, 50];

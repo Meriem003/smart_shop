@@ -7,16 +7,13 @@ import com.microtech.smartshop.dto.response.CustomerStatsResponse;
 import com.microtech.smartshop.dto.response.OrderResponse;
 import com.microtech.smartshop.entity.Customer;
 import com.microtech.smartshop.entity.Order;
-import com.microtech.smartshop.entity.User;
 import com.microtech.smartshop.enums.CustomerTier;
-import com.microtech.smartshop.enums.UserRole;
 import com.microtech.smartshop.exception.ResourceNotFoundException;
 import com.microtech.smartshop.exception.ValidationException;
 import com.microtech.smartshop.mapper.CustomerMapper;
 import com.microtech.smartshop.mapper.OrderMapper;
 import com.microtech.smartshop.repository.CustomerRepository;
 import com.microtech.smartshop.repository.OrderRepository;
-import com.microtech.smartshop.repository.UserRepository;
 import com.microtech.smartshop.service.CustomerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -33,7 +30,6 @@ public class CustomerServiceImpl implements CustomerService {
 
     private final CustomerRepository customerRepository;
     private final OrderRepository orderRepository;
-    private final UserRepository userRepository;
     private final CustomerMapper customerMapper;
     private final OrderMapper orderMapper;
 
@@ -42,26 +38,15 @@ public class CustomerServiceImpl implements CustomerService {
         if (customerRepository.existsByEmail(request.getEmail())) {
             throw new ValidationException("Un client avec cet email existe déjà");
         }
-        if (userRepository.existsByUsername(request.getUsername())) {
-            throw new ValidationException("Ce nom d'utilisateur est déjà utilisé");
-        }
-        User user = User.builder()
-                .username(request.getUsername())
-                .password(request.getPassword())
-                .role(UserRole.CLIENT)
-                .build();
+        
         Customer customer = Customer.builder()
                 .nom(request.getNom())
                 .email(request.getEmail())
                 .loyaltyTier(CustomerTier.BASIC)
                 .totalOrders(0)
                 .totalSpent(BigDecimal.ZERO)
-                .user(user)
                 .build();
 
-        user.setCustomer(customer);
-
-        userRepository.save(user);
         Customer saved = customerRepository.save(customer);
         return customerMapper.toResponse(saved);
     }
@@ -115,8 +100,14 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<CustomerResponse> getAllCustomers(Pageable pageable) {
-        return customerRepository.findAll(pageable)
-                .map(customerMapper::toResponse);
+    public Page<CustomerResponse> getAllCustomers(String nom, Pageable pageable) {
+        Page<Customer> customers;
+        if (nom != null && !nom.isBlank()) {
+            customers = customerRepository.findByNomContainingIgnoreCase(nom, pageable);
+        } else {
+            customers = customerRepository.findAll(pageable);
+        }
+        return customers.map(customerMapper::toResponse);
     }
+    
 }
